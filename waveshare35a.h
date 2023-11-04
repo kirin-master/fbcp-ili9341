@@ -23,4 +23,8 @@
 #define GPIO_TFT_RESET_PIN 25
 #endif
 
+// #if !defined(GPIO_TFT_BACKLIGHT)
+// #define GPIO_TFT_BACKLIGHT 18
+// #endif
+
 #endif

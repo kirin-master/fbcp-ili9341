@@ -104,9 +104,15 @@ void InitILI9486()
     SPI_TRANSFER(0x38/*Idle Mode OFF*/);
     SPI_TRANSFER(0x13/*Normal Display Mode ON*/);
 
-#if defined(GPIO_TFT_BACKLIGHT) && defined(BACKLIGHT_CONTROL)
+#if defined(BACKLIGHT_CONTROL)
+  #if defined(GPIO_TFT_BACKLIGHT)
     printf("Setting TFT backlight on at pin %d\n", GPIO_TFT_BACKLIGHT);
     TurnBacklightOn();
+  #else
+    QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x2c/*Set BCTRL(1)*/);
+    QUEUE_SPI_TRANSFER(0x51/*Write Display Brightness Value*/, 0xff/*Brightness ON*/);
+    QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x0c/*Set BCTRL(0)*/);
+  #endif
 #endif
 
     ClearScreen();
@@ -122,17 +128,33 @@ void InitILI9486()
 
 void TurnBacklightOff()
 {
-#if defined(GPIO_TFT_BACKLIGHT) && defined(BACKLIGHT_CONTROL)
+#if defined(BACKLIGHT_CONTROL)
+  #if defined(GPIO_TFT_BACKLIGHT)
   SET_GPIO_MODE(GPIO_TFT_BACKLIGHT, 0x01); // Set backlight pin to digital 0/1 output mode (0x01) in case it had been PWM controlled
   CLEAR_GPIO(GPIO_TFT_BACKLIGHT); // And turn the backlight off.
+  #else
+  puts("# turnoffBack");
+  //QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x28/*Brightness OFF*/);
+  QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x2c/*Set BCTRL(1)*/);
+  QUEUE_SPI_TRANSFER(0x51/*Write Display Brightness Value*/, 0x00/*Brightness OFF*/);
+  QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x0c/*Set BCTRL(0)*/);
+  #endif
 #endif
 }
 
 void TurnBacklightOn()
 {
-#if defined(GPIO_TFT_BACKLIGHT) && defined(BACKLIGHT_CONTROL)
-  SET_GPIO_MODE(GPIO_TFT_BACKLIGHT, 0x01); // Set backlight pin to digital 0/1 output mode (0x01) in case it had been PWM controlled
-  SET_GPIO(GPIO_TFT_BACKLIGHT); // And turn the backlight on.
+#if defined(BACKLIGHT_CONTROL)
+  #if defined(GPIO_TFT_BACKLIGHT)
+    SET_GPIO_MODE(GPIO_TFT_BACKLIGHT, 0x01); // Set backlight pin to digital 0/1 output mode (0x01) in case it had been PWM controlled
+    SET_GPIO(GPIO_TFT_BACKLIGHT); // And turn the backlight on.
+  #else
+  puts("# turnonBack");
+  //QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x2c/*Brightness ON*/);
+  QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x2c/*Set BCTRL(1)*/);
+  QUEUE_SPI_TRANSFER(0x51/*Write Display Brightness Value*/, 0xff/*Brightness ON*/);
+  QUEUE_SPI_TRANSFER(0x53/*Write CTRL Display Value*/, 0x0c/*Set BCTRL(0)*/);
+  #endif
 #endif
 }
 
